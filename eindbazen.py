@@ -116,6 +116,17 @@ async def on_message(message):
         else:
             await client.send_message(message.channel, "Geen GIFje gevonden :-(")
 
+    if message.content.startswith('!belike'):
+        url = 'https://belikebill.ga/billgen-API.php?default=1&name={0.author.mention}&sex=m'
+        async with aiohttp.ClientSession() as session:  # Async HTTP request
+            response = await session.get(url)
+            if response.status == 200:
+                with open('./gifjes/temp.jpg', 'wb') as f:
+                    response.raw.decode_content = True
+                    shutil.copyfileobj(response.raw, f)
+                with open('./gifjes/temp.jpg', 'rb') as picture:
+                    await client.send_file(message.channel, picture)
+
 @client.event
 async def on_ready():
     print('Logged in as')
