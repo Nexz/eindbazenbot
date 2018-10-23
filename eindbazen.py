@@ -24,8 +24,16 @@ def removeCommand(messageContent):
 
 @client.event
 async def on_message(message):
+        
     if message.content.startswith('!'): 
         print(message.author.name+" requested:\n"+message.content)
+
+    if message.content.startswith('kut bot'):
+        await client.send_message(message.channel, "Je bent zelf een kutbot "+message.author.name)
+
+    if "dan weet u dat" in message.content:
+        with open('./gifjes/dan-weet-u-dat.png', 'rb') as picture:
+             await client.send_file(message.channel, picture)
 
     if message.author == client.user:
         return
