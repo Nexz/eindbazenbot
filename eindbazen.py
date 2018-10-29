@@ -20,7 +20,11 @@ client = Bot(command_prefix="!")
 gapi = giphypop.Giphy(GIFTOKEN)
 
 def removeCommand(messageContent):
-    return messageContent.split(' ', 1)[1]
+    retMsg = messageContent.split(' ', 1)
+    if len(retMsg) > 1:
+        return retMsg[1]
+    else:
+        return ''
 
 @client.event
 async def on_message(message):
@@ -125,15 +129,18 @@ async def on_message(message):
             await client.send_message(message.channel, "Geen GIFje gevonden :-(")
 
     if message.content.startswith('!belike'):
-        url = 'https://belikebill.ga/billgen-API.php?default=1&name={0.author.mention}&sex=m'
-        async with aiohttp.ClientSession() as session:  # Async HTTP request
-            response = await session.get(url)
-            if response.status == 200:
-                with open('./gifjes/temp.jpg', 'wb') as f:
-                    response.raw.decode_content = True
-                    shutil.copyfileobj(response.raw, f)
-                with open('./gifjes/temp.jpg', 'rb') as picture:
-                    await client.send_file(message.channel, picture)
+        poppetje = removeCommand(message.content).replace(' ', '%20')
+        if poppetje == '':
+            await client.send_message(message.channel, "Wel een naampje opgeven neh.")   
+        else:
+            url = 'https://belikebill.ga/billgen-API.php?default=1&name='+poppetje+'&sex=m'
+            async with aiohttp.ClientSession() as session:  # Async HTTP request
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        with open('./gifjes/temp.jpg', 'wb') as f:
+                            f.write(await resp.read())
+                        with open('./gifjes/temp.jpg', 'rb') as picture:
+                            await client.send_file(message.channel, picture)
 
 @client.event
 async def on_ready():
