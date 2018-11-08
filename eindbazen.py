@@ -49,6 +49,9 @@ async def on_message(message):
         elif whatSound == "ak":
             soundFile = 'aks.ogg'
             returnString = "Worden gepopt met AK's in de back!"
+        elif whatSound == "we wachten":
+            soundFile = 'we-wachten.mp3'
+            returnString = "Ja... We wachtuh!"
         else:
             return
 
