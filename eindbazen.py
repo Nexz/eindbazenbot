@@ -26,11 +26,51 @@ def removeCommand(messageContent):
     else:
         return ''
 
+@client.command(pass_context=True)
+async def join(ctx):
+    channel = ctx.message.author.voice.voice_channel
+    await client.join_voice_channel(channel)
+
+
 @client.event
 async def on_message(message):
         
     if message.content.startswith('!'): 
         print(message.author.name+" requested:\n"+message.content)
+
+    if message.content.startswith('!sound'):
+        whatSound = removeCommand(message.content)
+        if whatSound == 'krakaka':
+            soundFile = 'krakaka.ogg'
+            returnString = "KRRRAAKAKA!!"
+        elif whatSound == 'balie':
+            soundFile = 'balie.ogg'
+            returnString = "Jij trekt toch iedereen over de balie?!"
+        elif whatSound == "ak":
+            soundFile = 'aks.ogg'
+            returnString = "Worden gepopt met AK's in de back!"
+        else:
+            return
+
+        msg = message
+        if msg.author.voice_channel:
+            try:
+                voice = await client.join_voice_channel(msg.author.voice_channel)
+                player = voice.create_ffmpeg_player('sounds/'+soundFile)
+                player.start()
+            except:
+               pass
+        else:
+            await client.send_message(msg.channel, 'You\'re not in a voice channel!')
+        while True:
+            try:
+                if player.is_done():
+                    await voice.disconnect()
+                    await client.send_message(msg.channel, returnString)
+                    break
+            except:
+                break
+
 
     if message.content.startswith('kut bot'):
         await client.send_message(message.channel, "Je bent zelf een kutbot "+message.author.name)
@@ -111,20 +151,36 @@ async def on_message(message):
     if message.content.startswith('!versie'):
         await client.send_message(message.channel, "EindbazenBot v"+VERSION+" rev 1337")
 
+    if message.content.startswith('!gifjetop'):
+        zoekGifje = removeCommand(message.content)
+        foundGif = gapi.search_list('', zoekGifje)
+        if len(foundGif) > 0:
+            rgif = requests.get(foundGif[0].media_url, stream=True)
+            if rgif.status_code == 200:
+                with open('./gifjes/temp.gif', 'wb') as f:
+                    rgif.raw.decode_content = True
+                    shutil.copyfileobj(rgif.raw, f)
+                with open('./gifjes/temp.gif', 'rb') as picture:
+                    await client.send_file(message.channel, picture)
+        else:
+            await client.send_message(message.channel, "Geen GIFje gevonden :-(")
+
+
     if message.content.startswith('!gifje'):
         zoekGifje = removeCommand(message.content)
         foundGif = gapi.search_list('', zoekGifje)
-        if len(foundGif) < 10:
-            randPos = random.randint(0, len(foundGif))
-        else:
-            randPos = random.randint(0, 10)
-        rgif = requests.get(foundGif[randPos].media_url, stream=True)
-        if rgif.status_code == 200:
-            with open('./gifjes/temp.gif', 'wb') as f:
-                rgif.raw.decode_content = True
-                shutil.copyfileobj(rgif.raw, f)
-            with open('./gifjes/temp.gif', 'rb') as picture:
-                await client.send_file(message.channel, picture)
+        if len(foundGif) > 0:
+            if len(foundGif) < 10:
+                randPos = random.randint(0, len(foundGif))
+            else:
+                randPos = random.randint(0, 10)
+            rgif = requests.get(foundGif[randPos].media_url, stream=True)
+            if rgif.status_code == 200:
+                with open('./gifjes/temp.gif', 'wb') as f:
+                    rgif.raw.decode_content = True
+                    shutil.copyfileobj(rgif.raw, f)
+                with open('./gifjes/temp.gif', 'rb') as picture:
+                    await client.send_file(message.channel, picture)
         else:
             await client.send_message(message.channel, "Geen GIFje gevonden :-(")
 
