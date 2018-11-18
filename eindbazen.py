@@ -52,9 +52,16 @@ async def on_message(message):
         elif whatSound == "we wachten":
             soundFile = 'we-wachten.mp3'
             returnString = "Ja... We wachtuh!"
+        elif whatSound == "boef":
+            soundFile = 'boef.ogg'
+            returnString = ''
+        elif whatSound == "kerssemus":
+            soundFile = 'bkd.mp3'
+            returnString = ''
         else:
             return
 
+        print("Requested for channel "+str(message.author.voice_channel))
         msg = message
         if msg.author.voice_channel:
             try:
@@ -69,7 +76,8 @@ async def on_message(message):
             try:
                 if player.is_done():
                     await voice.disconnect()
-                    await client.send_message(msg.channel, returnString)
+                    if returnString != "":
+                        await client.send_message(msg.channel, returnString)
                     break
             except:
                 break
